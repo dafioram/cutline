@@ -11,6 +11,8 @@ import { seekTo } from './media.js';
 const DRIFT = 0.2; // seconds of drift tolerated before re-syncing a playing element
 const PRELOAD = 2; // seconds ahead to prepare the next clip
 const MAX_ELEMENTS = 8;
+const HELD_MAX = 12; // clips whose last frame is kept for scrubbing
+const HELD_WIDTH = 960; // held frames are stored at most this wide
 
 export function outputSize(project) {
   const first = trackClips(project, 'video').find((c) => c.type === 'video' || c.type === 'image');
@@ -95,6 +97,42 @@ export class Player {
     this.size = { width: 1920, height: 1080 };
     this.duckCache = { key: '', points: [] };
     this.onEnded = null;
+    this.held = new Map(); // clip id -> {el: canvas, w, h}: last frame shown, for scrubbing
+    this.thumbImages = new Map(); // thumbnail data URL -> Image
+  }
+
+  /** Keep a copy of a video's current frame, shown while it seeks so the preview never goes black. */
+  holdFrame(key, el) {
+    if (el.readyState < 2 || el.seeking || !el.videoWidth) return;
+    const w = Math.min(HELD_WIDTH, el.videoWidth);
+    const h = Math.max(1, Math.round((w * el.videoHeight) / el.videoWidth));
+    let entry = this.held.get(key);
+    if (!entry || entry.w !== w || entry.h !== h) entry = { el: new OffscreenCanvas(w, h), w, h };
+    try {
+      entry.el.getContext('2d').drawImage(el, 0, 0, w, h);
+    } catch {
+      return;
+    }
+    this.held.delete(key);
+    this.held.set(key, entry);
+    for (const k of this.held.keys()) {
+      if (this.held.size <= HELD_MAX) break;
+      this.held.delete(k);
+    }
+  }
+
+  /** Nearest import thumbnail, for a clip that hasn't shown a real frame yet. */
+  thumbFor(mediaId, sourceTime) {
+    const src = this.media.thumbAt(mediaId, sourceTime);
+    if (!src) return null;
+    let img = this.thumbImages.get(src);
+    if (!img) {
+      img = new Image();
+      img.onload = () => this.requestRender();
+      img.src = src;
+      this.thumbImages.set(src, img);
+    }
+    return img.complete && img.naturalWidth ? { el: img, w: img.naturalWidth, h: img.naturalHeight } : null;
   }
 
   ensureAudio() {
@@ -225,7 +263,12 @@ export class Player {
         activeVideo.add(key);
         this.syncVideo(item, layer, t, pending);
         const el = item.el;
-        return el.readyState >= 2 ? { el, w: el.videoWidth, h: el.videoHeight } : null;
+        if (el.readyState >= 2 && !el.seeking) {
+          if (!this.playing) this.holdFrame(key, el);
+          return { el, w: el.videoWidth, h: el.videoHeight };
+        }
+        // Mid-seek the element has no picture: show the last frame, else the nearest thumbnail.
+        return this.held.get(key) || this.thumbFor(layer.mediaId, layer.sourceTime);
       }
       if (layer.kind === 'image') {
         const bmp = this.media.bitmaps.get(layer.mediaId);
@@ -278,7 +321,12 @@ export class Player {
     } else {
       if (!el.paused) el.pause();
       if (Math.abs(el.currentTime - target) > 0.02 && !el.seeking) {
-        pending.push(seekTo(el, target).catch(() => {}));
+        // Capture the frame the moment the seek lands, before the next seek replaces it.
+        pending.push(
+          seekTo(el, target)
+            .then(() => this.holdFrame(layer.clip.id, el))
+            .catch(() => {}),
+        );
       } else if (el.readyState < 2) {
         pending.push(new Promise((r) => el.addEventListener('loadeddata', r, { once: true })));
       }
@@ -376,5 +424,7 @@ export class Player {
     this.pause();
     this.videos.clear();
     this.audios.clear();
+    this.held.clear();
+    this.thumbImages.clear();
   }
 }

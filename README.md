@@ -105,7 +105,7 @@ npm run test:e2e                    # browser tests
 
 - **Unit tests** (`tests/unit/`) cover the editing model: placing, snapping, pushing, trimming, splitting and deleting clips; overlay lanes; transitions and what gets drawn at each moment; split points and file names; the running clock format; music dimming curves; GIF size planning; scene detection; SRT parsing; and reading recording dates from MP4 files.
 - **The offline-cache check** (`scripts/check-precache.mjs`) fails if a file the app needs isn't in the service worker's precache list, or if any import points at a missing file.
-- **Browser tests** (`tests/e2e/`) drive the real app in Chromium: importing every media kind, dropping one or several files from the desktop onto the workspace, timeline and storyboard, editing on the timeline, storyboard reordering, overlays and preview dragging, music dimming in the exported mix, split export to a zip, single MP4 and WebM export, Quick share GIFs, reloading with the project intact, working offline, and converting an AVI with the bundled FFmpeg.
+- **Browser tests** (`tests/e2e/`) drive the real app in Chromium: importing every media kind, dropping one or several files from the desktop onto the workspace, timeline and storyboard, the preview showing pictures (not black) while you drag the playhead, editing on the timeline, storyboard reordering, overlays and preview dragging, music dimming in the exported mix, split export to a zip, single MP4 and WebM export, Quick share GIFs, reloading with the project intact, working offline, and converting an AVI with the bundled FFmpeg.
 
 To use a Chromium or Chrome you already have, set `CHROMIUM_PATH=/path/to/chrome`.
 
@@ -142,6 +142,7 @@ A few design decisions worth knowing:
 - Export speed depends on the footage: each frame waits for a seek, so long 4K exports take a while. Keep the tab open; it can be in the background.
 - Sound is decoded whole for export and waveforms. Videos over 400 MB have their sound extracted with FFmpeg first. Very long movies need more memory.
 - The FFmpeg converter is single-threaded and slower than native FFmpeg; files over about 2 GB may be too big for it.
+- While you drag the playhead, the preview shows each frame as soon as the browser finishes seeking to it, holding the previous frame in between. On long, high-resolution phone videos the picture can trail the cursor by a moment; it lands on the exact frame when you stop.
 - Preview playback keeps video elements in sync with a master clock and corrects drift above 0.2 seconds, so preview sync is close but not frame-exact. Exports are frame-exact.
 
 ## Privacy
