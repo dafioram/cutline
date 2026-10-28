@@ -1,0 +1,21 @@
+{
+  "name": "cutline",
+  "version": "1.0.0",
+  "description": "A desktop video editor that runs entirely in the browser. Static site, offline-capable, no uploads.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "npm run test:unit && npm run check:sw",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "check:sw": "node scripts/check-precache.mjs",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}

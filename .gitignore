@@ -1,0 +1,20 @@
+# Dependencies (dev only: the app itself has no build step)
+node_modules/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Deploy staging folder built by CI
+_site/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.log

@@ -1,0 +1,29 @@
+{
+  "name": "Cutline video editor",
+  "short_name": "Cutline",
+  "description": "Edit video in your browser. Works offline; files never leave your computer.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1c2633",
+  "theme_color": "#1c2633",
+  "categories": ["photo", "productivity", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "video/*": [".mp4", ".m4v", ".mov", ".webm", ".mkv", ".avi"],
+        "audio/*": [".mp3", ".m4a", ".wav", ".ogg", ".flac", ".opus"],
+        "image/*": [".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif", ".heic"]
+      }
+    }
+  ],
+  "launch_handler": { "client_mode": "focus-existing" }
+}

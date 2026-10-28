@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cutline</title>
+    <meta name="description" content="A desktop video editor that runs entirely in your browser. Your files never leave your computer." />
+    <meta name="theme-color" content="#1c2633" />
+    <link rel="icon" href="icons/favicon.ico" sizes="any" />
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="toolbar" id="toolbar"></header>
+      <main class="workarea" id="workarea">
+        <aside class="panel" id="workspace" aria-label="Workspace"></aside>
+        <div class="splitter" data-split="left" role="separator" aria-orientation="vertical" aria-label="Resize workspace"></div>
+        <section class="panel" id="preview" aria-label="Preview"></section>
+        <div class="splitter" data-split="right" role="separator" aria-orientation="vertical" aria-label="Resize properties"></div>
+        <aside class="panel" id="properties" aria-label="Properties"></aside>
+      </main>
+      <div class="splitter splitter-h" data-split="timeline" role="separator" aria-orientation="horizontal" aria-label="Resize timeline"></div>
+      <section class="panel timeline-area" id="timeline" aria-label="Timeline"></section>
+    </div>
+    <noscript>Cutline needs JavaScript to run.</noscript>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
